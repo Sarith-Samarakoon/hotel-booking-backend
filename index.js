@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import userRouter from "./routes/usersRoute.js";
 import galleryItemRouter from "./routes/galleryItemRoute.js";
+import categoryRouter from "./routes/categoryRoute.js";
 import jwt from "jsonwebtoken";
 import dotenv, { config } from "dotenv";
 import mongoose from "mongoose";
@@ -42,6 +43,7 @@ mongoose
 
 app.use("/api/users", userRouter);
 app.use("/api/gallery", galleryItemRouter);
+app.use("/api/category", categoryRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
