@@ -1,14 +1,6 @@
 import Category from "../models/category.js";
+import { isUserValidate } from "./userControllers.js";
 
-function isUserValidate(req) {
-  if (req.user == null) {
-    return false;
-  }
-  if (req.user.type != "admin") {
-    return false;
-  }
-  return true;
-}
 export function createCategory(req, res) {
   if (!isUserValidate(req)) {
     res.status(403).json({

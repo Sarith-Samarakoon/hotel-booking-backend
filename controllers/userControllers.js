@@ -5,6 +5,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+export function isUserValidate(req) {
+  if (req.user == null) {
+    return false;
+  }
+  if (req.user.type != "admin") {
+    return false;
+  }
+  return true;
+}
+
 export function getUsers(req, res) {
   User.find()
     .then((userList) => {
