@@ -3,20 +3,22 @@ import express from "express";
 import userRouter from "./routes/usersRoute.js";
 import galleryItemRouter from "./routes/galleryItemRoute.js";
 import jwt from "jsonwebtoken";
+import dotenv, { config } from "dotenv";
 import mongoose from "mongoose";
+
+dotenv.config();
 
 const app = express();
 
 app.use(bodyParser.json());
 
-const connection =
-  "mongodb+srv://samarakoonsarith:sariya123@cluster0.ajveo9f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const connection = process.env.MONGO_URL;
 
 app.use((req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (token != null) {
-    jwt.verify(token, "secret", (err, decoded) => {
+    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
       if (decoded != null) {
         req.user = decoded;
         next();
