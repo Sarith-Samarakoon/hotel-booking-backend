@@ -15,6 +15,16 @@ export function isUserValidate(req) {
   return true;
 }
 
+export function isCustomerValidate(req) {
+  if (req.user == null) {
+    return false;
+  }
+  if (req.user.type != "customer") {
+    return false;
+  }
+  return true;
+}
+
 export function getUsers(req, res) {
   User.find()
     .then((userList) => {
@@ -76,10 +86,6 @@ export function deleteUsers(req, res) {
         message: "User delete failed",
       });
     });
-
-  // res.json({
-  //   message: "This is a delete request",
-  // });
 }
 
 export function putUsers(req, res) {
