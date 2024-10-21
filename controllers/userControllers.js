@@ -63,14 +63,12 @@ export function postUsers(req, res) {
         message: "User Created Successfully",
       });
     })
-    .catch(() => {
-      res.json({
+    .catch((err) => {
+      res.status(500).json({
         message: "User creation failed",
+        error: err.message,
       });
     });
-  // res.json({
-  //   message: "This is a post request",
-  // });
 }
 
 export function deleteUsers(req, res) {
@@ -97,40 +95,53 @@ export function putUsers(req, res) {
 export function loginUser(req, res) {
   const credentials = req.body;
 
-  User.findOne({ email: credentials.email }).then((user) => {
-    if (user == null) {
-      rex.status(404).json({
-        message: "User not found",
-      });
-    } else {
+  if (!credentials.email || !credentials.password) {
+    return res.status(400).json({
+      message: "Email and password are required",
+    });
+  }
+
+  User.findOne({ email: credentials.email })
+    .then((user) => {
+      if (user == null) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
       const isPasswordValid = bcrypt.compareSync(
         credentials.password,
         user.password
       );
 
       if (!isPasswordValid) {
-        res.status(403).json({
+        return res.status(403).json({
           message: "Incorrect password",
         });
-      } else {
-        const payload = {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          type: user.type,
-        };
-
-        const token = jwt.sign(payload, process.env.JWT_KEY, {
-          expiresIn: "48h",
-        });
-
-        res.json({
-          message: "Login Successful",
-          user: user,
-          token: token,
-        });
       }
-    }
-  });
+
+      const payload = {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        type: user.type,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_KEY, {
+        expiresIn: "48h",
+      });
+
+      res.json({
+        message: "Login Successful",
+        user: user,
+        token: token,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Internal server error",
+        error: err.message,
+      });
+    });
 }
