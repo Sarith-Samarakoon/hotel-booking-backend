@@ -8,11 +8,13 @@ import bookingRouter from "./routes/bookingRoute.js";
 import jwt from "jsonwebtoken";
 import dotenv, { config } from "dotenv";
 import mongoose from "mongoose";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(bodyParser.json());
 
 const connection = process.env.MONGO_URL;
