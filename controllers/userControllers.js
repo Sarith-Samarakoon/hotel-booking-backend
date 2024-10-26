@@ -26,21 +26,18 @@ export function isCustomerValidate(req) {
 }
 
 export function getUsers(req, res) {
-  User.find()
-    .then((userList) => {
-      res.json({
-        list: userList,
-      });
-    })
-    .catch(() => {
-      res.json({
-        message: "User Reading Failed",
-      });
-    });
+  const user = req.user;
 
-  // res.json({
-  //   message: "This is the get request",
-  // });
+  if (user == null) {
+    res.status(403).json({
+      message: "USer not found",
+    });
+  } else {
+    res.json({
+      message: "Users fetched successfully",
+      users: user,
+    });
+  }
 }
 
 export function postUsers(req, res) {
