@@ -25,7 +25,7 @@ app.use((req, res, next) => {
   if (token != null) {
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
       if (decoded != null) {
-        req.user = decoded;
+        req.body.user = decoded;
         next();
       } else {
         next();

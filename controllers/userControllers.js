@@ -26,11 +26,12 @@ export function isCustomerValidate(req) {
 }
 
 export function getUsers(req, res) {
-  const user = req.user;
+  const user = req.body.user;
+  console.log(user);
 
   if (user == null) {
     res.status(403).json({
-      message: "USer not found",
+      message: "User not found",
     });
   } else {
     res.json({
