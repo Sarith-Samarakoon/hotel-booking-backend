@@ -5,42 +5,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export function isUserValidate(req) {
-  if (req.user == null) {
-    return false;
-  }
-  if (req.user.type != "admin") {
-    return false;
-  }
-  return true;
-}
-
-export function isCustomerValidate(req) {
-  if (req.user == null) {
-    return false;
-  }
-  if (req.user.type != "customer") {
-    return false;
-  }
-  return true;
-}
-
-export function getUsers(req, res) {
-  const user = req.body.user;
-  console.log(user);
-
-  if (user == null) {
-    res.status(403).json({
-      message: "User not found",
-    });
-  } else {
-    res.json({
-      message: "Users fetched successfully",
-      users: user,
-    });
-  }
-}
-
 export function postUsers(req, res) {
   const user = req.body;
   // console.log(user);
@@ -139,6 +103,42 @@ export function loginUser(req, res) {
     .catch((err) => {
       res.status(500).json({
         message: "Internal server error",
+        error: err.message,
+      });
+    });
+}
+
+export function isUserValidate(req) {
+  if (req.user == null) {
+    return false;
+  }
+  if (req.user.type != "admin") {
+    return false;
+  }
+  return true;
+}
+
+export function isCustomerValidate(req) {
+  if (req.user == null) {
+    return false;
+  }
+  if (req.user.type != "customer") {
+    return false;
+  }
+  return true;
+}
+
+export function getUsers(req, res) {
+  User.find()
+    .then((users) => {
+      res.json({
+        message: "Users fetched successfully",
+        users: users,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Failed to fetch users",
         error: err.message,
       });
     });

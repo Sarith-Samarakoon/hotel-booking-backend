@@ -20,19 +20,20 @@ app.use(bodyParser.json());
 const connection = process.env.MONGO_URL;
 
 app.use((req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const token = req.header("Authorization")?.replace("Bearer ", ""); // Extract token from Authorization header
 
-  if (token != null) {
+  if (token) {
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
-      if (decoded != null) {
-        req.body.user = decoded;
-        next();
+      if (err) {
+        console.error("Invalid token:", err.message); // Log token errors
+        next(); // Continue without user if token is invalid
       } else {
+        req.user = decoded; // Attach decoded token to req.user
         next();
       }
     });
   } else {
-    next();
+    next(); // No token, continue without user
   }
 });
 
