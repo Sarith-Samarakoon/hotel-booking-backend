@@ -1,4 +1,5 @@
 import GalleryItem from "../models/galleryItem.js";
+import { isUserValidate } from "./userControllers.js";
 
 export function postGalleryItem(req, res) {
   const user = req.user;
@@ -42,6 +43,56 @@ export function getGalleryItems(req, res) {
     .catch(() => {
       res.status(500).json({
         message: "Gallery reading failed",
+      });
+    });
+}
+
+export function deleteGalleryItem(res, req) {
+  const id = req.params.id;
+  const user = req.user;
+
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Unauthorized",
+    });
+    return;
+  }
+
+  GalleryItem.findByIdAndDelete(id)
+    .then(() => {
+      res.json({
+        message: "Gallery Item deleted successfully",
+      });
+    })
+    .catch(() => {
+      res.status(500).json({
+        message: "Gallery Item deletion failed",
+      });
+    });
+}
+
+export function updateGalleryItem(res, req) {
+  const id = req.params.id;
+  const user = req.user;
+
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Unauthorized",
+    });
+    return;
+  }
+
+  const galleryItem = req.body;
+
+  GalleryItem.findByIdAndUpdate(id, galleryItem)
+    .then(() => {
+      res.json({
+        message: "Gallery Item updated successfully",
+      });
+    })
+    .catch(() => {
+      res.status(500).json({
+        message: "Gallery Item update failed",
       });
     });
 }
