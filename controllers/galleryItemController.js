@@ -1,5 +1,4 @@
 import GalleryItem from "../models/galleryItem.js";
-import { isUserValidate } from "./userControllers.js";
 
 export function postGalleryItem(req, res) {
   const user = req.user;
@@ -47,13 +46,20 @@ export function getGalleryItems(req, res) {
     });
 }
 
-export function deleteGalleryItem(res, req) {
+export function deleteGalleryItem(req, res) {
   const id = req.params.id;
   const user = req.user;
 
-  if (!isUserValidate(req)) {
+  if (user == null) {
     res.status(403).json({
-      message: "Unauthorized",
+      message: "Please login to delete a gallery item",
+    });
+    return;
+  }
+
+  if (user.type != "admin") {
+    res.status(403).json({
+      message: "You are not authorized to delete a gallery item",
     });
     return;
   }
@@ -75,9 +81,16 @@ export function updateGalleryItem(res, req) {
   const id = req.params.id;
   const user = req.user;
 
-  if (!isUserValidate(req)) {
+  if (user == null) {
     res.status(403).json({
-      message: "Unauthorized",
+      message: "Please login to update a gallery item",
+    });
+    return;
+  }
+
+  if (user.type != "admin") {
+    res.status(403).json({
+      message: "You are not authorized to update a gallery item",
     });
     return;
   }
