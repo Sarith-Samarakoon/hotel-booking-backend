@@ -77,7 +77,7 @@ export function deleteGalleryItem(req, res) {
     });
 }
 
-export function updateGalleryItem(res, req) {
+export function updateGalleryItem(req, res) {
   const id = req.params.id;
   const user = req.user;
 
