@@ -34,15 +34,28 @@ export function postUsers(req, res) {
 }
 
 export function deleteUsers(req, res) {
-  const email = req.body.email;
-  User.deleteOne({ email: email })
-    .then(() => {
+  if (!isUserValidate(req)) {
+    return res.status(403).json({
+      message: "Unauthorized",
+    });
+  }
+
+  const email = req.params.email; // Extract email from route parameter
+
+  User.findOneAndDelete({ email: email })
+    .then((deletedUser) => {
+      if (!deletedUser) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
       res.json({
         message: "User deleted successfully",
       });
     })
-    .catch(() => {
-      res.json({
+    .catch((err) => {
+      console.error("Error deleting user:", err);
+      res.status(500).json({
         message: "User delete failed",
       });
     });

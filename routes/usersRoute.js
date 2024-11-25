@@ -13,7 +13,7 @@ userRouter.get("/", getUsers);
 
 userRouter.post("/", postUsers);
 
-userRouter.delete("/", deleteUsers);
+userRouter.delete("/:email", deleteUsers);
 
 userRouter.put("/", putUsers);
 

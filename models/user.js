@@ -41,6 +41,10 @@ const userSchema = mongoose.Schema({
     required: true,
     default: false,
   },
+  image: {
+    type: String,
+    required: true,
+  },
 });
 
 const User = mongoose.model("Users", userSchema);
