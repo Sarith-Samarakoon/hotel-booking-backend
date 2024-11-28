@@ -9,6 +9,8 @@ import jwt from "jsonwebtoken";
 import dotenv, { config } from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
+import staffRouter from "./routes/staffRoute.js";
+import eventRouter from "./routes/eventRoute.js";
 
 dotenv.config();
 
@@ -51,6 +53,8 @@ app.use("/api/gallery", galleryItemRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
+app.use("/api/staff", staffRouter);
+app.use("/api/events", eventRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
