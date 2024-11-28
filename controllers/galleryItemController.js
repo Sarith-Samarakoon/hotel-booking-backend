@@ -25,9 +25,10 @@ export function postGalleryItem(req, res) {
         message: "Gallery Created Successfully",
       });
     })
-    .catch(() => {
+    .catch((err) => {
       res.status(500).json({
         message: "Gallery Creation Failed",
+        message: err.message,
       });
     });
 }

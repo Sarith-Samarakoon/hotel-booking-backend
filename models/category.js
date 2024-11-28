@@ -22,6 +22,10 @@ const categorySchema = mongoose.Schema({
   image: {
     type: String,
   },
+  bedtype: {
+    type: String,
+    required: true,
+  },
 });
 
 const Category = mongoose.model("categories", categorySchema);
