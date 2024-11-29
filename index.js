@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import staffRouter from "./routes/staffRoute.js";
 import eventRouter from "./routes/eventRoute.js";
+import contactRouter from "./routes/contactRoute.js";
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/staff", staffRouter);
 app.use("/api/events", eventRouter);
+app.use("/api/contacts", contactRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
