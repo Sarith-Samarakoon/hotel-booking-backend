@@ -3,7 +3,9 @@ import {
   createContactMessage,
   getAllContactMessages,
   getUserMessages,
+  deleteContactMessage,
   filterMessagesByDate,
+  toggleReadStatus,
   //   respondToMessage,
 } from "../controllers/contactControllers.js";
 
@@ -20,6 +22,10 @@ contactRouter.get("/user", getUserMessages);
 
 // Route to filter messages by date range (Admin only)
 contactRouter.post("/filter-date", filterMessagesByDate);
+
+contactRouter.delete("/:id", deleteContactMessage); // Delete route using `_id`
+
+contactRouter.put("/toggle-read-status/:id", toggleReadStatus);
 
 // // Route for admin to respond to a contact message
 // contactRouter.post("/respond", respondToMessage);

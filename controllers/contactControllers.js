@@ -57,6 +57,47 @@ export function getAllContactMessages(req, res) {
     });
 }
 
+// Toggle the read/unread status of a Contact Message (Admin Only)
+export function toggleReadStatus(req, res) {
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+    return;
+  }
+
+  const { id } = req.params; // The ID of the message to toggle read/unread
+
+  Contact.findById(id)
+    .then((message) => {
+      if (!message) {
+        return res.status(404).json({
+          message: "Message not found",
+        });
+      }
+
+      // Toggle the read status (true becomes false and false becomes true)
+      message.read = !message.read;
+
+      // Save the updated message
+      return message.save();
+    })
+    .then((updatedMessage) => {
+      res.json({
+        message: `Message marked as ${
+          updatedMessage.read ? "read" : "unread"
+        } successfully`,
+        updatedMessage: updatedMessage,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Error updating message status",
+        error: err,
+      });
+    });
+}
+
 // Get Messages by User Email
 export function getUserMessages(req, res) {
   if (isUserValidate(req)) {
@@ -107,6 +148,38 @@ export function filterMessagesByDate(req, res) {
     .catch((err) => {
       res.status(500).json({
         message: "Failed to retrieve filtered messages",
+        error: err,
+      });
+    });
+}
+
+// Delete a Contact Message (Admin Only)
+export function deleteContactMessage(req, res) {
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+    return;
+  }
+
+  const { id } = req.params; // Use `_id` instead of `messageId`
+
+  Contact.findByIdAndDelete(id)
+    .then((deletedMessage) => {
+      if (deletedMessage) {
+        res.json({
+          message: "Message deleted successfully",
+          deletedMessage: deletedMessage,
+        });
+      } else {
+        res.status(404).json({
+          message: "Message not found",
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Failed to delete message",
         error: err,
       });
     });

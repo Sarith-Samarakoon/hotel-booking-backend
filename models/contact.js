@@ -21,6 +21,10 @@ const contactSchema = mongoose.Schema({
     type: Date,
     default: Date.now, // Timestamp for when the contact request was made
   },
+  read: {
+    type: Boolean,
+    default: false, // Default value is false (unread)
+  },
 });
 
 const Contact = mongoose.model("contacts", contactSchema);
