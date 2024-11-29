@@ -16,7 +16,7 @@ userRouter.post("/", postUsers);
 
 userRouter.delete("/:email", deleteUsers);
 
-userRouter.put("/", putUsers);
+userRouter.put("/:id", putUsers);
 
 userRouter.post("/login", loginUser);
 

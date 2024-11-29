@@ -62,9 +62,55 @@ export function deleteUsers(req, res) {
 }
 
 export function putUsers(req, res) {
-  res.json({
-    message: "This is a put request",
-  });
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      message: "Unauthorized: Invalid or missing token",
+    });
+  }
+
+  const updates = req.body; // The updated fields from the request body
+
+  // Prevent updating sensitive fields (e.g., password or type) directly
+  const allowedUpdates = [
+    "firstName",
+    "lastName",
+    "phone",
+    "whatsApp",
+    "email",
+    "image",
+  ];
+  const updateKeys = Object.keys(updates);
+
+  const isValidUpdate = updateKeys.every((key) => allowedUpdates.includes(key));
+
+  if (!isValidUpdate) {
+    return res.status(400).json({
+      message: "Invalid updates. Only specific fields can be updated.",
+    });
+  }
+
+  User.findByIdAndUpdate(
+    req.user.id, // The logged-in user's ID
+    { $set: updates }, // Apply updates
+    { new: true, runValidators: true } // Return the updated document and validate updates
+  )
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      res.json({
+        message: "User updated successfully",
+        user: updatedUser,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Failed to update user details",
+        error: err.message,
+      });
+    });
 }
 
 export function loginUser(req, res) {
