@@ -142,6 +142,12 @@ export function isCustomerValidate(req) {
 }
 
 export function getUsers(req, res) {
+  if (!isUserValidate(req)) {
+    return res.status(403).json({
+      message: "Unauthorized",
+    });
+  }
+
   User.find()
     .then((users) => {
       res.json({
@@ -152,6 +158,33 @@ export function getUsers(req, res) {
     .catch((err) => {
       res.status(500).json({
         message: "Failed to fetch users",
+        error: err.message,
+      });
+    });
+}
+
+export function getLoggedInUser(req, res) {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      message: "Unauthorized: Invalid or missing token",
+    });
+  }
+
+  User.findById(req.user.id)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      res.json({
+        message: "User fetched successfully",
+        user: user,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Failed to fetch user details",
         error: err.message,
       });
     });

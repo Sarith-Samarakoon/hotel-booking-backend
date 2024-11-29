@@ -5,6 +5,7 @@ import {
   postUsers,
   deleteUsers,
   loginUser,
+  getLoggedInUser,
 } from "../controllers/userControllers.js";
 
 const userRouter = express.Router();
@@ -18,6 +19,8 @@ userRouter.delete("/:email", deleteUsers);
 userRouter.put("/", putUsers);
 
 userRouter.post("/login", loginUser);
+
+userRouter.get("/me", getLoggedInUser); // Fetch logged-in user details
 
 export default userRouter;
 
