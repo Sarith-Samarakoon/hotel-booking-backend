@@ -1,42 +1,81 @@
 import Booking from "../models/booking.js";
 import { isCustomerValidate, isUserValidate } from "./userControllers.js";
+import { Counter } from "../models/counter.js";
 
-export function createBooking(req, res) {
+// export function createBooking(req, res) {
+//   if (!isCustomerValidate(req)) {
+//     res.status(403).json({
+//       message: "Forbidden",
+//     });
+//     return;
+//   }
+//   const startingId = 1200;
+
+//   Booking.countDocuments({})
+//     .then((count) => {
+//       console.log(count);
+//       const newId = startingId + count + 1;
+//       //Booking.findOne().sort({ bookingId: -1 })
+//       const newBooking = new Booking({
+//         bookingId: newId,
+//         roomId: req.body.roomId,
+//         email: req.user.email,
+//         start: req.body.start,
+//         end: req.body.end,
+//         notes: req.body.notes || "",
+//         guests: req.body.guests, // Add guests field
+//       });
+//       newBooking.save().then((result) => {
+//         res.json({
+//           message: "Booking created successfully",
+//           result: result,
+//         });
+//       });
+//     })
+//     .catch((err) => {
+//       res.status(500).json({
+//         message: "Error creating booking",
+//         error: err,
+//       });
+//     });
+// }
+
+export async function createBooking(req, res) {
   if (!isCustomerValidate(req)) {
-    res.status(403).json({
-      message: "Forbidden",
-    });
+    res.status(403).json({ message: "Forbidden" });
     return;
   }
-  const startingId = 1200;
 
-  Booking.countDocuments({})
-    .then((count) => {
-      console.log(count);
-      const newId = startingId + count + 1;
-      //Booking.findOne().sort({ bookingId: -1 })
-      const newBooking = new Booking({
-        bookingId: newId,
-        roomId: req.body.roomId,
-        email: req.user.email,
-        start: req.body.start,
-        end: req.body.end,
-        notes: req.body.notes || "",
-        guests: req.body.guests, // Add guests field
-      });
-      newBooking.save().then((result) => {
-        res.json({
-          message: "Booking created successfully",
-          result: result,
-        });
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: "Error creating booking",
-        error: err,
-      });
+  try {
+    // Fetch and increment the bookingId counter
+    const counter = await Counter.findOneAndUpdate(
+      { name: "bookingId" }, // Counter name
+      { $inc: { seq: 1 } }, // Increment sequence
+      { new: true, upsert: true } // Create if doesn't exist
+    );
+
+    const newBooking = new Booking({
+      bookingId: counter.seq, // Use the counter sequence
+      roomId: req.body.roomId,
+      email: req.user.email,
+      start: req.body.start,
+      end: req.body.end,
+      notes: req.body.notes || "",
+      guests: req.body.guests,
     });
+
+    const result = await newBooking.save();
+    res.json({
+      message: "Booking created successfully",
+      result: result,
+    });
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    res.status(500).json({
+      message: "Error creating booking",
+      error: error.message,
+    });
+  }
 }
 
 export function getBookings(req, res) {
