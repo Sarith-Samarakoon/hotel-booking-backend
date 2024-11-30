@@ -12,6 +12,7 @@ import cors from "cors";
 import staffRouter from "./routes/staffRoute.js";
 import eventRouter from "./routes/eventRoute.js";
 import contactRouter from "./routes/contactRoute.js";
+import feedbackRouter from "./routes/feedbackRoute.js";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use("/api/bookings", bookingRouter);
 app.use("/api/staff", staffRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/contacts", contactRouter);
+app.use("/api/feedback", feedbackRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
