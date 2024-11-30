@@ -172,3 +172,55 @@ export function createBookingOnUsingCategory(req, res) {
     });
   });
 }
+
+export const deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the booking by ID
+    const deletedBooking = await Booking.findOneAndDelete({ bookingId: id });
+    if (!deletedBooking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json({
+      message: "Booking deleted successfully",
+      deletedBooking,
+    });
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    res.status(500).json({
+      message: "Failed to delete booking",
+      error: error.message,
+    });
+  }
+};
+
+export const updateBooking = async (req, res) => {
+  try {
+    const { id } = req.params; // Booking ID passed as a route parameter
+    const updateData = req.body; // Data to update
+
+    // Find the booking by ID and update it with the new data
+    const updatedBooking = await Booking.findOneAndUpdate(
+      { bookingId: id },
+      updateData,
+      { new: true } // Return the updated booking
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json({
+      message: "Booking updated successfully",
+      updatedBooking,
+    });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+    res.status(500).json({
+      message: "Failed to update booking",
+      error: error.message,
+    });
+  }
+};
