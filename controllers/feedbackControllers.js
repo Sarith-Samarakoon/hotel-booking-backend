@@ -34,7 +34,9 @@ export async function createFeedback(req, res) {
       userName: `${user.firstName} ${user.lastName}`,
       bookingId: booking.bookingId, // Assuming bookingId is stored as a string
       roomId: booking.roomId,
-      userProfileImage: user.image || "null", // Add a default image if null
+      userProfileImage:
+        user.image ||
+        "https://i.pinimg.com/736x/9e/83/75/9e837528f01cf3f42119c5aeeed1b336.jpg", // Add a default image if null
       rating: req.body.rating,
       message: req.body.message,
     };
