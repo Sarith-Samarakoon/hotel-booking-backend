@@ -6,6 +6,10 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  roomId: {
+    type: mongoose.Schema.Types.String, // Reference to the room
+    required: true, // Make it required if every booking must have a room
+  },
   email: {
     type: String,
     required: true,
@@ -30,6 +34,10 @@ const bookingSchema = new mongoose.Schema({
   notes: {
     type: String,
     default: "",
+  },
+  guests: {
+    type: Number, // Field for number of guests
+    required: true, // Make it required
   },
   timesStamp: {
     type: Date,

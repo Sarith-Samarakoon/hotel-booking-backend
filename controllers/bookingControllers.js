@@ -21,6 +21,8 @@ export function createBooking(req, res) {
         email: req.user.email,
         start: req.body.start,
         end: req.body.end,
+        notes: req.body.notes || "",
+        guests: req.body.guests, // Add guests field
       });
       newBooking.save().then((result) => {
         res.json({
