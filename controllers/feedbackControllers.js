@@ -114,3 +114,39 @@ export const updateFeedback = async (req, res) => {
     });
   }
 };
+
+// DELETE feedback by ID
+export function deleteFeedback(req, res) {
+  const id = req.params.id; // Feedback ID from request parameters
+  const user = req.user; // User data from authentication middleware
+
+  // Check if the user is logged in
+  if (user == null) {
+    res.status(403).json({
+      message: "Please login to delete feedback",
+    });
+    return;
+  }
+
+  // Check if the user has admin privileges
+  if (user.type != "admin") {
+    res.status(403).json({
+      message: "You are not authorized to delete feedback",
+    });
+    return;
+  }
+
+  // Find and delete feedback by ID
+  Feedback.findByIdAndDelete(id)
+    .then(() => {
+      res.json({
+        message: "Feedback deleted successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error deleting feedback:", err);
+      res.status(500).json({
+        message: "Feedback deletion failed",
+      });
+    });
+}
