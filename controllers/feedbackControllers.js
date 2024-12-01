@@ -1,6 +1,30 @@
 import Feedback from "../models/feedback.js";
 import Booking from "../models/booking.js";
-import { isCustomerValidate } from "./userControllers.js";
+import { isUserValidate, isCustomerValidate } from "./userControllers.js";
+
+export async function getFeedback(req, res) {
+  try {
+    // Retrieve all feedback for both admin and customers
+    if (isUserValidate(req) || isCustomerValidate(req)) {
+      const feedback = await Feedback.find();
+      return res.status(200).json({
+        message: "All feedback retrieved successfully",
+        feedback: feedback,
+      });
+    } else {
+      // Forbidden for other roles
+      return res.status(403).json({
+        message: "Forbidden: You are not authorized to view feedback.",
+      });
+    }
+  } catch (err) {
+    console.error("Error retrieving feedback:", err);
+    res.status(500).json({
+      message: "Error retrieving feedback",
+      error: err.message,
+    });
+  }
+}
 
 export async function createFeedback(req, res) {
   try {
@@ -56,3 +80,37 @@ export async function createFeedback(req, res) {
     });
   }
 }
+
+export const updateFeedback = async (req, res) => {
+  try {
+    const { id } = req.params; // Feedback ID passed as a route parameter
+    const updateData = req.body; // Data to update
+    const user = req.user; // User information from authentication middleware
+
+    // Find the feedback by ID
+    const feedback = await Feedback.findById(id);
+
+    if (!feedback) {
+      return res.status(404).json({ message: "Feedback not found" });
+    }
+
+    // Update the feedback with the new data
+    Object.keys(updateData).forEach((key) => {
+      feedback[key] = updateData[key];
+    });
+
+    // Save the updated feedback
+    const updatedFeedback = await feedback.save();
+
+    res.status(200).json({
+      message: "Feedback updated successfully",
+      updatedFeedback,
+    });
+  } catch (error) {
+    console.error("Error updating feedback:", error);
+    res.status(500).json({
+      message: "Failed to update feedback",
+      error: error.message,
+    });
+  }
+};
