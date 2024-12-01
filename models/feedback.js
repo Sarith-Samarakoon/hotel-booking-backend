@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const feedbackSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user", // Reference to the User model
-      required: true,
-    },
     bookingId: {
       type: String,
       ref: "Booking", // Reference to the Booking model
