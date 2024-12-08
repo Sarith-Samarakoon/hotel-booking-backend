@@ -2,6 +2,8 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import Otp from "../models/otp.js";
 
 dotenv.config();
 
@@ -21,8 +23,17 @@ export function postUsers(req, res) {
   newUser
     .save()
     .then(() => {
-      res.json({
-        message: "User Created Successfully",
+      const otp = Math.floor(1000 + Math.random() * 9000);
+
+      const newOtp = new Otp({
+        email: user.email,
+        otp: otp,
+      });
+      newOtp.save().then(() => {
+        sendOtpEmail(user.email, otp);
+        res.json({
+          message: "User Created Successfully",
+        });
       });
     })
     .catch((err) => {
@@ -147,6 +158,7 @@ export function loginUser(req, res) {
         firstName: user.firstName,
         lastName: user.lastName,
         type: user.type,
+        image: user.image,
       };
 
       const token = jwt.sign(payload, process.env.JWT_KEY, {
@@ -233,5 +245,68 @@ export function getLoggedInUser(req, res) {
         message: "Failed to fetch user details",
         error: err.message,
       });
+    });
+}
+
+export function sendOtpEmail(email, otp) {
+  const transport = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "samarakoonsarith@gmail.com",
+      pass: "pepv vhyp xdmk dlho",
+    },
+  });
+
+  const message = {
+    from: "samarakoonsarith@gmail.com",
+    to: email,
+    subject: "Validating OTP",
+    text: "Your otp code is " + otp,
+  };
+
+  transport.sendMail(message, (err, info) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Failed to send email",
+        error: err.message,
+      });
+    }
+    res.json({
+      message: "Email sent successfully",
+      info: info,
+    });
+  });
+}
+
+export function verifyUserEmail(req, res) {
+  const otp = req.body.otp;
+  const email = req.body.email;
+
+  Otp.find({ email: email })
+    .sort({ date: -1 })
+    .then((otpList) => {
+      if (otpList.length === 0) {
+        return res.status(400).json({
+          message: "Invalid OTP",
+        });
+      } else {
+        const latestOtp = otpList[0];
+        if (latestOtp.otp === otp) {
+          User.findOneAndUpdate({ email: email }, { emailVerified: true }).then(
+            () => {
+              res.json({
+                message: "User email verified successfully",
+              });
+            }
+          );
+        } else {
+          return res.status(400).json({
+            message: "Invalid OTP",
+          });
+        }
+      }
     });
 }
