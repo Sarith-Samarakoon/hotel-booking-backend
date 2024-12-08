@@ -206,12 +206,36 @@ export function getUsers(req, res) {
     });
   }
 
+  // Extract pagination parameters from the query string
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const skip = (page - 1) * limit; // Calculate how many documents to skip
+
   User.find()
+    .skip(skip)
+    .limit(limit)
     .then((users) => {
-      res.json({
-        message: "Users fetched successfully",
-        users: users,
-      });
+      // Count total users for pagination metadata
+      User.countDocuments()
+        .then((total) => {
+          res.json({
+            message: "Users fetched successfully",
+            users: users,
+            pagination: {
+              total: total,
+              page: page,
+              limit: limit,
+              totalPages: Math.ceil(total / limit),
+            },
+          });
+        })
+        .catch((err) => {
+          console.error("Error counting users:", err);
+          res.status(500).json({
+            message: "Failed to fetch user count",
+            error: err.message,
+          });
+        });
     })
     .catch((err) => {
       res.status(500).json({
