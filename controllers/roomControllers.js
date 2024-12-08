@@ -73,16 +73,35 @@ export function findRoomById(req, res) {
 }
 
 export function getRooms(req, res) {
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 5; // Default to 5 items per page
+
+  const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
   Room.find()
-    .then((result) => {
-      res.json({
-        message: "Rooms retrieved successfully",
-        rooms: result,
+    .skip(skip) // Skip the first `skip` documents
+    .limit(limit) // Limit the results to `limit` documents
+    .then((rooms) => {
+      Room.countDocuments().then((totalRooms) => {
+        const totalPages = Math.ceil(totalRooms / limit); // Calculate total pages
+
+        res.json({
+          message: "Rooms retrieved successfully",
+          rooms,
+          pagination: {
+            total: totalRooms,
+            page,
+            limit,
+            totalPages,
+          },
+        });
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error("Error retrieving rooms:", err);
       res.status(500).json({
         message: "Failed to retrieve rooms",
+        error: err.message,
       });
     });
 }

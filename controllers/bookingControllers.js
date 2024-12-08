@@ -79,12 +79,26 @@ export async function createBooking(req, res) {
 }
 
 export function getBookings(req, res) {
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const skip = (page - 1) * limit;
+
   if (isUserValidate(req)) {
     Booking.find()
+      .skip(skip)
+      .limit(limit)
       .then((bookings) => {
-        res.json({
-          message: "All bookings retrieved successfully",
-          bookings: bookings,
+        Booking.countDocuments().then((total) => {
+          res.json({
+            message: "All bookings retrieved successfully",
+            bookings: bookings,
+            pagination: {
+              total: total,
+              page: page,
+              limit: limit,
+              totalPages: Math.ceil(total / limit),
+            },
+          });
         });
       })
       .catch((err) => {
@@ -95,10 +109,20 @@ export function getBookings(req, res) {
       });
   } else if (isCustomerValidate(req)) {
     Booking.find({ email: req.user.email })
+      .skip(skip)
+      .limit(limit)
       .then((bookings) => {
-        res.json({
-          message: "Your bookings retrieved successfully",
-          bookings: bookings,
+        Booking.countDocuments({ email: req.user.email }).then((total) => {
+          res.json({
+            message: "Your bookings retrieved successfully",
+            bookings: bookings,
+            pagination: {
+              total: total,
+              page: page,
+              limit: limit,
+              totalPages: Math.ceil(total / limit),
+            },
+          });
         });
       })
       .catch((err) => {

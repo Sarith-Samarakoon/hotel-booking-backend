@@ -42,11 +42,25 @@ export function getAllContactMessages(req, res) {
     return;
   }
 
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 messages per page
+  const skip = (page - 1) * limit;
+
   Contact.find()
+    .skip(skip)
+    .limit(limit)
     .then((messages) => {
-      res.json({
-        message: "All messages retrieved successfully",
-        messages: messages,
+      Contact.countDocuments().then((total) => {
+        res.json({
+          message: "All messages retrieved successfully",
+          messages: messages,
+          pagination: {
+            total: total,
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(total / limit),
+          },
+        });
       });
     })
     .catch((err) => {

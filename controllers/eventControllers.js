@@ -48,10 +48,24 @@ export function deleteEvent(req, res) {
 }
 
 export function getEvents(req, res) {
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 events per page
+  const skip = (page - 1) * limit;
+
   Event.find()
-    .then((result) => {
-      res.json({
-        events: result,
+    .skip(skip)
+    .limit(limit)
+    .then((events) => {
+      Event.countDocuments().then((totalEvents) => {
+        res.json({
+          events,
+          pagination: {
+            totalEvents,
+            page,
+            limit,
+            totalPages: Math.ceil(totalEvents / limit),
+          },
+        });
       });
     })
     .catch(() => {

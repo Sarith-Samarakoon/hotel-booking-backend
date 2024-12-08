@@ -31,27 +31,33 @@ export async function createInquiry(req, res) {
 // Get Inquiries (Admin: All, User: Own inquiries)
 export async function getInquiries(req, res) {
   try {
-    // If the user is an admin, retrieve all inquiries
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const skip = (page - 1) * limit;
+
+    let inquiries, totalInquiries;
+
     if (isUserValidate(req)) {
-      const inquiries = await Inquiry.find();
-      res.json({
-        message: "All inquiries retrieved successfully",
-        inquiries,
-      });
+      totalInquiries = await Inquiry.countDocuments();
+      inquiries = await Inquiry.find().skip(skip).limit(limit);
+    } else if (isCustomerValidate(req)) {
+      const email = req.user.email;
+      totalInquiries = await Inquiry.countDocuments({ email });
+      inquiries = await Inquiry.find({ email }).skip(skip).limit(limit);
+    } else {
+      return res.status(403).json({ message: "Forbidden" });
     }
-    // If the user is a customer, retrieve inquiries matching their email
-    else if (isCustomerValidate(req)) {
-      const email = req.user.email; // Assuming `req.user.email` contains the logged-in user's email
-      const inquiries = await Inquiry.find({ email }); // Filter by email
-      res.json({
-        message: "Your inquiries retrieved successfully",
-        inquiries,
-      });
-    }
-    // If the user is neither an admin nor a customer, return Forbidden
-    else {
-      res.status(403).json({ message: "Forbidden" });
-    }
+
+    res.json({
+      message: "Inquiries retrieved successfully",
+      inquiries,
+      pagination: {
+        totalInquiries,
+        page,
+        limit,
+        totalPages: Math.ceil(totalInquiries / limit),
+      },
+    });
   } catch (error) {
     console.error("Error retrieving inquiries:", error);
     res.status(500).json({

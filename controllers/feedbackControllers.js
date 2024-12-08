@@ -4,15 +4,26 @@ import { isUserValidate, isCustomerValidate } from "./userControllers.js";
 
 export async function getFeedback(req, res) {
   try {
-    // Retrieve all feedback for both admin and customers
+    // Validate user role
     if (isUserValidate(req) || isCustomerValidate(req)) {
-      const feedback = await Feedback.find();
+      const page = parseInt(req.query.page) || 1; // Default to page 1
+      const limit = parseInt(req.query.limit) || 5; // Default to 5 items per page
+      const skip = (page - 1) * limit;
+
+      const feedback = await Feedback.find().skip(skip).limit(limit);
+      const totalFeedback = await Feedback.countDocuments();
+
       return res.status(200).json({
-        message: "All feedback retrieved successfully",
+        message: "Feedback retrieved successfully",
         feedback: feedback,
+        pagination: {
+          total: totalFeedback,
+          page: page,
+          limit: limit,
+          totalPages: Math.ceil(totalFeedback / limit),
+        },
       });
     } else {
-      // Forbidden for other roles
       return res.status(403).json({
         message: "Forbidden: You are not authorized to view feedback.",
       });
