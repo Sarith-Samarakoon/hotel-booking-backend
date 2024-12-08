@@ -310,3 +310,55 @@ export function verifyUserEmail(req, res) {
       }
     });
 }
+
+//change type of user
+export function changeUserType(req, res) {
+  //validate admin
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+    return;
+  }
+  const userId = req.params.id;
+  const type = req.body.type;
+
+  User.findOneAndUpdate({ _id: userId }, { type: type })
+    .then(() => {
+      res.json({
+        message: "User type updated",
+      });
+    })
+    .catch((err) => {
+      res.json({
+        message: "User type update failed",
+        error: err,
+      });
+    });
+}
+
+//disable or enable user
+export function disableUser(req, res) {
+  //validate admin
+  if (!isUserValidate(req)) {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+    return;
+  }
+  const userId = req.params.id;
+  const disabled = req.body.disabled;
+
+  User.findOneAndUpdate({ _id: userId }, { disabled: disabled })
+    .then(() => {
+      res.json({
+        message: "User disabled/enabled",
+      });
+    })
+    .catch((err) => {
+      res.json({
+        message: "User disable/enable failed",
+        error: err,
+      });
+    });
+}

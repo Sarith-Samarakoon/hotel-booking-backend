@@ -7,6 +7,8 @@ import {
   loginUser,
   getLoggedInUser,
   verifyUserEmail,
+  changeUserType,
+  disableUser,
 } from "../controllers/userControllers.js";
 
 const userRouter = express.Router();
@@ -24,6 +26,10 @@ userRouter.post("/login", loginUser);
 userRouter.get("/me", getLoggedInUser); // Fetch logged-in user details
 
 userRouter.post("/verify-email", verifyUserEmail);
+
+userRouter.put("/change-type/:id", changeUserType);
+
+userRouter.put("/disable/:id", disableUser);
 
 export default userRouter;
 
