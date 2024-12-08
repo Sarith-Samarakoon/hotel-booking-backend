@@ -14,6 +14,7 @@ import eventRouter from "./routes/eventRoute.js";
 import contactRouter from "./routes/contactRoute.js";
 import feedbackRouter from "./routes/feedbackRoute.js";
 import inquiryRouter from "./routes/inquiryRoute.js";
+import statRouter from "./routes/statRoute.js";
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use("/api/events", eventRouter);
 app.use("/api/contacts", contactRouter);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/inquiry", inquiryRouter);
+app.use("/api/stat", statRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
