@@ -49,7 +49,7 @@ export function deleteCategory(req, res) {
 
 export function getCategories(req, res) {
   const page = parseInt(req.query.page) || 1; // Default to page 1
-  const limit = parseInt(req.query.limit) || 10; // Default to 10 categories per page
+  const limit = parseInt(req.query.limit) || 20; // Default to 10 categories per page
   const skip = (page - 1) * limit;
 
   Category.find()

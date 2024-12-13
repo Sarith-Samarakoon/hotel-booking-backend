@@ -35,7 +35,7 @@ export function postGalleryItem(req, res) {
 
 export function getGalleryItems(req, res) {
   const page = parseInt(req.query.page) || 1; // Default to page 1
-  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const limit = parseInt(req.query.limit) || 50; // Default to 10 items per page
   const skip = (page - 1) * limit; // Calculate skip value
 
   GalleryItem.find()
