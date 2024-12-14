@@ -80,7 +80,7 @@ export async function createBooking(req, res) {
 
 export function getBookings(req, res) {
   const page = parseInt(req.query.page) || 1; // Default to page 1
-  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const limit = parseInt(req.query.limit) || 100; // Default to 10 items per page
   const skip = (page - 1) * limit;
 
   if (isUserValidate(req)) {

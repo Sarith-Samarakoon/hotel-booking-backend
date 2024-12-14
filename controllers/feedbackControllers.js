@@ -7,7 +7,7 @@ export async function getFeedback(req, res) {
     // Validate user role
     if (isUserValidate(req) || isCustomerValidate(req)) {
       const page = parseInt(req.query.page) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit) || 5; // Default to 5 items per page
+      const limit = parseInt(req.query.limit) || 100; // Default to 5 items per page
       const skip = (page - 1) * limit;
 
       const feedback = await Feedback.find().skip(skip).limit(limit);
