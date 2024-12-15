@@ -1,4 +1,5 @@
 import Booking from "../models/booking.js";
+import Room from "../models/room.js";
 import { isCustomerValidate, isUserValidate } from "./userControllers.js";
 import { Counter } from "../models/counter.js";
 
@@ -166,74 +167,74 @@ export function retrieveBookingByDate(req, res) {
     });
 }
 
-export function createBookingOnUsingCategory(req, res) {
-  const start = new Date(req.body.start);
-  const end = new Date(req.body.end);
+export async function createBookingOnUsingCategory(req, res) {
+  try {
+    const start = new Date(req.body.start);
+    const end = new Date(req.body.end);
 
-  Booking.find({
-    $or: [
-      {
-        start: {
-          $gte: start,
-          $lte: end,
+    // Find bookings that overlap with the given date range
+    const overlappingBookings = await Booking.find({
+      $or: [
+        {
+          start: {
+            $gte: start,
+            $lte: end,
+          },
         },
-      },
-      {
-        end: {
-          $gte: start,
-          $lte: end,
+        {
+          end: {
+            $gte: start,
+            $lte: end,
+          },
         },
-      },
-    ],
-  }).then((response) => {
-    const overlappingBookings = response;
-    const rooms = [];
+      ],
+    });
 
-    for (let i = 0; i < overlappingBookings.length; i++) {
-      rooms.push(overlappingBookings[i].roomId);
+    // Extract room IDs from overlapping bookings
+    const occupiedRooms = overlappingBookings.map((booking) => booking.roomId);
+
+    // Find available rooms in the specified category
+    const availableRooms = await Room.find({
+      roomId: { $nin: occupiedRooms },
+      category: req.body.category,
+    });
+
+    if (availableRooms.length === 0) {
+      return res.json({
+        message: "No available rooms in the specified category",
+      });
     }
 
-    Room.find({
-      roomId: {
-        $nin: rooms,
-      },
-      category: req.body.category,
-    }).then((rooms) => {
-      if (rooms.length == 0) {
-        res.json({
-          message: "No available rooms in the specified category",
-        });
-      } else {
-        const startingId = 1200;
+    // Fetch and increment the bookingId counter
+    const counter = await Counter.findOneAndUpdate(
+      { name: "bookingId" }, // Counter name
+      { $inc: { seq: 1 } }, // Increment sequence
+      { new: true, upsert: true } // Create if doesn't exist
+    );
 
-        Booking.countDocuments({})
-          .then((count) => {
-            console.log(count);
-            const newId = startingId + count + 1;
-            //Booking.findOne().sort({ bookingId: -1 })
-            const newBooking = new Booking({
-              bookingId: newId,
-              roomId: req.body.roomId,
-              email: req.user.email,
-              start: req.body.start,
-              end: req.body.end,
-            });
-            newBooking.save().then((result) => {
-              res.json({
-                message: "Booking created successfully",
-                result: result,
-              });
-            });
-          })
-          .catch((err) => {
-            res.status(500).json({
-              message: "Error creating booking",
-              error: err,
-            });
-          });
-      }
+    // Create a new booking with the first available room
+    const newBooking = new Booking({
+      bookingId: counter.seq, // Use the counter sequence
+      roomId: availableRooms[0].roomId, // Use the first available room
+      email: req.body.email,
+      start: req.body.start,
+      end: req.body.end,
+      guests: req.body.guests, // Include guests if provided
     });
-  });
+
+    const result = await newBooking.save();
+
+    res.json({
+      message: "Booking created successfully",
+      result: result,
+    });
+  } catch (error) {
+    console.error("Error creating booking on using category:", error);
+    res.status(500).json({
+      message: "Error creating booking",
+      error: error.message,
+    });
+  }
 }
 
 export const deleteBooking = async (req, res) => {
