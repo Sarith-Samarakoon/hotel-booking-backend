@@ -169,24 +169,32 @@ export function retrieveBookingByDate(req, res) {
 
 export async function createBookingOnUsingCategory(req, res) {
   try {
-    const start = new Date(req.body.start);
-    const end = new Date(req.body.end);
+    const { start, end, category, guests } = req.body;
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    // Find a room in the specified category to get the maximum guests allowed
+    const room = await Room.findOne({ category });
+
+    if (!room) {
+      return res.status(404).json({
+        message: "Room category not found",
+      });
+    }
+
+    // Check if the number of guests exceeds the maximum allowed
+    if (guests > room.maxGuests) {
+      return res.status(400).json({
+        message: `The maximum number of guests allowed for ${category} is ${room.maxGuests}.`,
+      });
+    }
 
     // Find bookings that overlap with the given date range
     const overlappingBookings = await Booking.find({
       $or: [
-        {
-          start: {
-            $gte: start,
-            $lte: end,
-          },
-        },
-        {
-          end: {
-            $gte: start,
-            $lte: end,
-          },
-        },
+        { start: { $gte: startDate, $lte: endDate } },
+        { end: { $gte: startDate, $lte: endDate } },
       ],
     });
 
@@ -196,7 +204,7 @@ export async function createBookingOnUsingCategory(req, res) {
     // Find available rooms in the specified category
     const availableRooms = await Room.find({
       roomId: { $nin: occupiedRooms },
-      category: req.body.category,
+      category,
     });
 
     if (availableRooms.length === 0) {
@@ -207,19 +215,19 @@ export async function createBookingOnUsingCategory(req, res) {
 
     // Fetch and increment the bookingId counter
     const counter = await Counter.findOneAndUpdate(
-      { name: "bookingId" }, // Counter name
-      { $inc: { seq: 1 } }, // Increment sequence
-      { new: true, upsert: true } // Create if doesn't exist
+      { name: "bookingId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
     );
 
     // Create a new booking with the first available room
     const newBooking = new Booking({
-      bookingId: counter.seq, // Use the counter sequence
-      roomId: availableRooms[0].roomId, // Use the first available room
+      bookingId: counter.seq,
+      roomId: availableRooms[0].roomId,
       email: req.body.email,
-      start: req.body.start,
-      end: req.body.end,
-      guests: req.body.guests, // Include guests if provided
+      start,
+      end,
+      guests,
     });
 
     const result = await newBooking.save();
@@ -229,7 +237,7 @@ export async function createBookingOnUsingCategory(req, res) {
       result: result,
     });
   } catch (error) {
-    console.error("Error creating booking on using category:", error);
+    console.error("Error creating booking:", error);
     res.status(500).json({
       message: "Error creating booking",
       error: error.message,
