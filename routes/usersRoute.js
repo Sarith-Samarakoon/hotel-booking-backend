@@ -45,12 +45,6 @@ export default userRouter;
 //   });
 // });
 
-// userRouter.delete("/", (req, res) => {
-//   res.json({
-//     message: "This is a delete request",
-//   });
-// });
-
 // userRouter.put("/", (req, res) => {
 //   res.json({
 //     message: "This is a put request",
